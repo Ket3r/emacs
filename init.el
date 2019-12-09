@@ -107,3 +107,7 @@
 
 
 (helm-mode 1)
+
+
+;; start server for use with emacs-client
+(start-server)

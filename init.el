@@ -6,6 +6,9 @@
 (setq inhibit-startup-message t)
 
 (setq mac-command-modifier 'meta)
+ 
+(set-frame-font "Fantasque Sans Mono 16")
+
 
 (package-initialize)
 (require 'package)
@@ -48,9 +51,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(lsp-vhdl-server (quote hdl-checker))
  '(package-selected-packages
    (quote
-    (helm use-package doom-themes doom-modeline ace-window))))
+    (helm-lsp vhdl-capf vhdl-tools lsp-mode company helm use-package doom-themes doom-modeline ace-window))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -107,3 +111,14 @@
 
 
 (helm-mode 1)
+
+
+(global-set-key "\M-/" 'complete-symbol)
+
+
+(require 'use-package)
+(setq lsp-vhdl-server "hdl_checker")
+;;(setq lsp-vhdl-server-path "hdl_checker") ; only needed if hdl_checker is not already on the PATH
+
+(use-package lsp-mode
+  :config (add-hook 'vhdl-mode-hook 'lsp))

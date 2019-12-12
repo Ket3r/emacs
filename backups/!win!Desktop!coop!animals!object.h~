@@ -1,0 +1,16 @@
+#ifndef OBJECT_H
+#define OBJECT_H
+
+#include "object.r"
+
+struct OBJECT_TYPE
+{
+  int (*tp_init)(struct OBJECT *);
+  int (*tp_finalize)(struct OBJECT *);
+};
+
+extern struct OBJECT_TYPE object_type_instance;
+extern struct OBJECT_TYPE *object_type;
+
+
+#endif /* OBJECT_H */

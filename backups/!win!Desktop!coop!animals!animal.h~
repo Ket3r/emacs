@@ -1,0 +1,21 @@
+#ifndef ANIMAL_H
+#define ANIMAL_H
+
+
+#include "animal.r"
+#include "object.h"
+
+struct ANIMAL;
+
+struct ANIMAL_TYPE
+{
+  struct OBJECT_TYPE base;
+  int (*makeNoise)(struct ANIMAL *);
+  int (*sleep)(struct ANIMAL *);
+  int (*roam)(struct ANIMAL *);
+};
+
+extern struct ANIMAL_TYPE animal_type_instance;
+extern struct ANIMAL_TYPE *animal_type;
+
+#endif

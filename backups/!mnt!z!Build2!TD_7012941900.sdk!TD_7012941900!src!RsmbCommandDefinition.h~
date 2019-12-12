@@ -1,0 +1,114 @@
+/*****************************************************************************/
+/**
+ @file  RsmbCommandDefinition.h
+ @originator  Bernd Klotz (BK) Phone 81309
+ @copyright  (c) Rohde & Schwarz, Messgeraetebau GmbH & Co. KG, Memmingen
+
+ @language  C
+ @description  Command-Defines f�r den MicroBlaze
+
+ -------------------------------------------------------------------------------
+ -------------------------------------------------------------------------------
+ -------------------------------------------------------------------------------
+ "HELLOWORLD" gibt "HELLO WORLD! HERE I AM! Vxx.xx" aus
+
+ -------------------------------------------------------------------------------
+ -------------------------------------------------------------------------------
+ -------------------------------------------------------------------------------
+ *** FLASH ***
+ Chip-Erase
+ "FLASH CHIPERASE"
+
+ Sector-Erase
+ "FLASH SECTORERASE 0"
+ |
+ -- Adresse innerhalb des zu l�schenden Sektors
+
+ Flash programmieren - Nach der �bertragung des Befehls schliesst sich die Daten�bertragung an
+ "FLASH PROG 1024 8192 1 1"
+ |    | | |
+ |    | | - Byteswap enable
+ |    | --- Bitswap enable
+ |    |
+ |    ----- Anzahl der Worte
+ ---------- Startadresse
+
+ Flash auslesen - Nach der �bertragung des Befehls schliesst sich die Daten�bertragung an
+ "FLASH READ 0 1024 1 1"
+ |    | | |
+ |    | | - Byteswap enable
+ |    | --- Bitswap enable
+ |    |
+ |    -- Anzahl der Worte
+ ------- Startadresse
+
+ Checksumme bilden - Nach der �bertragung des Befehls schliesst sich die Daten�bertragung an
+ "FLASH CRC 0 1024 1 1"
+ |    | | |
+ |    | | - Byteswap enable
+ |    | --- Bitswap enable
+ |    |
+ |    -- Anzahl der Worte
+ ------- Startadresse f�r die Checksumme in Byte.
+
+ Schreibzyklus - schreibt ein Datenwort auf eine Adresse
+ "FLASH WRITECYCLE 0 165 16"
+ |   |  |
+ |   |  -- Selektion der Bitbreite des Datenworts (8, 16, oder 32)
+ |   ----- Zieldatenwort
+ --------- Zieladresse im Flash
+
+ Lesezyklus - liest ein Datenwort aus einer Adresse. Nach der �bertragung des Befehls schliesst sich die Daten�bertragung an
+ "FLASH READCYCLE 0 16"
+ |  |
+ |  -- Selektion der Bitbreite des Datenworts (8, 16, oder 32)
+ ----- Zieladresse im Flash
+
+ Manufacturer-Code - liest den Code aus dem Flash. Nach der �bertragung des Befehls schliesst sich die Daten�bertragung an
+ "FLASH MANU_ID"
+
+ Device-Id-Code - liest den Code aus dem Flash. Nach der �bertragung des Befehls schliesst sich die Daten�bertragung an
+ "FLASH DEVICE_ID"
+
+ @see
+
+ @history
+
+ -------------------------------------------------------------------------------
+
+ $Workfile:  $
+ $Author:  $
+
+ $Source:  $
+ $Revision:  $
+ $Date:  $
+
+ ******************************************************************************/
+
+#ifndef RSMBCOMMANDDEFINITION_H_
+#define RSMBCOMMANDDEFINITION_H_
+
+#include "RsmbSpiFlashCommands.h"
+
+// Commando-Definition
+#define COMMAND_HELLO_WORLD                    "HELLOWORLD"
+
+#define COMMAND_ADDRESS                        "ADDRESS"
+
+#define COMMAND_ADC                            "ADC_SAMPLE"
+#define COMMAND_LED                            "SET_LED"
+#define COMMAND_MUX                            "SET_MUX"
+
+#define COMMAND_GET                            "GET"
+#define COMMAND_SET 		               "SET"
+
+#define COMMAND_FLAG                           "FLAG"
+#define COMMAND_FLAG_NFAULT 		       "NFAULT"
+#define COMMAND_FLAG_OVLD 		       "OVLD"
+#define COMMAND_FLAG_RESET 		       "RESET"
+
+#define COMMAND_ADC_PI 			       "ADC_PI"
+#define COMMAND_ADC_SPI 		       "ADC_SPI"
+
+
+#endif /*RSMBCOMMANDDEFINITION_H_*/

@@ -1,0 +1,24 @@
+#define RSMB_OBJECT_HEAD struct RsmbObject base;
+
+#ifndef OBJECT_H
+#define OBJECT_H
+
+struct OBJECT
+{
+  struct OBJECT_TYPE *type;
+  unsigned size;
+};
+
+struct OBJECT_TYPE
+{
+  struct OBJECT base;
+  int (*tp_init)(struct OBJECT *);
+  int (*tp_finalize)(struct OBJECT *);
+};
+
+extern struct OBJECT_TYPE *object_type;
+extern struct OBJECT_TYPE object_type_inst;
+
+int init_object_type(struct OBJECT_TYPE **object_type);
+
+#endif /* OBJECT_H */

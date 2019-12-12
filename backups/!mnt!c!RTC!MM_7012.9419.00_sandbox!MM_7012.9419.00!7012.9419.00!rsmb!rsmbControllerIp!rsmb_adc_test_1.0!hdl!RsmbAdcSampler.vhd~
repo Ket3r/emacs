@@ -1,0 +1,319 @@
+----------------------------------------------------------------------------------
+-- Company:         Rohde&Schwarz Memmingen
+-- Engineer:        Bernd Klotz MEN2 81309 (BK)
+--
+-- Create Date:     12:06:45 11/15/2007
+-- Design Name:
+-- Module Name:     RsmbAdcSampler
+-- Project Name:
+-- Target Devices:
+-- Tool versions:
+-- Description:     Modul zum Samplen eines ADC in Echtzeit
+--
+-- Dependencies:
+--
+-- Revision:
+--                  01.00   2008-01-11  BK  Erste Freigabe
+-- Additional Comments:
+--
+----------------------------------------------------------------------------------
+library IEEE;
+use IEEE.STD_LOGIC_1164.all;
+use IEEE.Numeric_std.all;
+
+---- Uncomment the following library declaration if instantiating
+---- any Xilinx primitives in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
+
+entity RsmbAdcSampler is
+  generic
+    (
+      gAdcWidth : integer := 8
+      );
+  port
+    (
+      poResetIn : in std_logic;
+
+      poSysClkIn : in  std_logic;
+      poAdcClk   : in  std_logic;
+      poAdcData  : in  std_logic_vector (gAdcWidth - 1 downto 0);
+      poPuls     : out std_logic;
+
+-- Steuersignale PC -> Design
+      poControlStart          : in std_logic;
+      poControlReset          : in std_logic;
+      poControlPulsLength     : in std_logic_vector (31 downto 0);
+      poControlSelectTestData : in std_logic;
+      poRdEnableIn            : in std_logic;
+
+-- Steuersignale Design -> PC
+      poFinishCapture    : out std_logic;  -- Kennzeichnet eine laufende Aufzeichnung
+      poBufferEmptyOut   : out std_logic;
+      poAdcClkOk         : out std_logic;
+      poSamplesOut       : out std_logic_vector (gAdcWidth - 1 downto 0);  -- aktuelles Datenwort
+      poSampleCounterOut : out std_logic_vector (31 downto 0);  -- aktuelle Anzahl der Samples nach einem Sample-Vorgang
+
+      poFifoResetOut  : out std_logic := '0';
+      poFifoWrDataOut : out std_logic_vector (gAdcWidth - 1 downto 0);
+      poFifoRdClkOut  : out std_logic;
+      poFifoRdEnOut   : out std_logic;
+      poFifoWrClkOut  : out std_logic;
+      poFifoWrEnOut   : out std_logic;
+      poFifoRdDataIn  : in  std_logic_vector (gAdcWidth - 1 downto 0);
+      poFifoEmptyIn   : in  std_logic;
+      poFifoFullIn    : in  std_logic
+      );
+end RsmbAdcSampler;
+
+-------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------
+architecture aRsmbAdcSampler of RsmbAdcSampler is
+-- States der Sample-Statemachine
+  type tSampleStateMachineStates is (SampleStateMachineIdle,
+                                     SampleStateMachineReset,
+                                     SampleStateMachineStartConversionHigh,
+                                     SampleStateMachineWaitForPulsLow,
+                                     SampleStateMachineWaitForPulsHigh,
+                                     SampleStateMachineSample,
+                                     SampleStateMachineSampleEnd);
+  constant cDoubleBufferDataWidth : integer := 32;
+
+-------------------------------------------------------------------------------------
+  signal sSysClk                    : std_logic := '0';
+  signal sAdcClk                    : std_logic := '0';
+  attribute clock_signal            : string;
+  attribute clock_signal of sAdcClk : signal is "yes";
+  attribute clock_signal of sSysClk : signal is "yes";
+
+  signal sResetIntern : std_logic := '0';
+
+  signal sResetAdc    : std_logic := '0';
+  attribute ASYNC_REG of sResetAdc : label is "TRUE";
+  signal sResetAdc1   : std_logic := '0';
+  attribute ASYNC_REG of sResetAdc1 : label is "TRUE";
+
+  signal sBufferReset : std_logic := '0';
+
+  signal sPulsCounter : natural   := 0;
+  signal sPuls        : std_logic := '0';
+
+  signal sBufferFull                        : std_logic := '0';
+  signal sBufferFullSysClk                  : std_logic := '0';
+  attribute ASYNC_REG of sBufferFullSysClk  : label is "TRUE";
+  signal sBufferFullSysClk1                 : std_logic := '0';
+  attribute ASYNC_REG of sBufferFullSysClk1 : label is "TRUE";
+
+  signal sControlStart                  : std_logic := '0';
+  attribute ASYNC_REG of sControlStart  : label is "TRUE";
+  signal sControlStart1                 : std_logic := '0';
+  attribute ASYNC_REG of sControlStart1 : label is "TRUE";
+  
+  signal sSampleCounter                 : unsigned (31 downto 0);
+  signal sBufferDataIn   : std_logic_vector (gAdcWidth - 1 downto 0);
+  signal sBufferDataOut  : std_logic_vector (gAdcWidth - 1 downto 0) := (others => '0');
+  signal sBufferEmpty    : std_logic                                 := '0';
+  signal sBufferRdEnable : std_logic                                 := '0';
+  signal sBufferWrEnable : std_logic                                 := '0';
+
+  signal sAdcClkOk                  : std_logic := '0';
+  attribute ASYNC_REG of sAdcClkOk  : label is "true";
+  signal sAdcClkOk1                 : std_logic := '0';
+  attribute ASYNC_REG of sAdcClkOk1 : label is "TRUE";
+
+  signal sControlSelectTestDataAdcClk                  : std_logic := '0';
+  attribute ASYNC_REG of sControlSelectTestDataAdcClk  : label is "TRUE";
+  signal sControlSelectTestDataAdcClk1                 : std_logic := '0';
+  attribute ASYNC_REG of sControlSelectTestDataAdcClk1 : label is "TRUE";
+
+  signal sControlPulsLength                  : std_logic_vector (31 downto 0);
+  attribute ASYNC_REG of sControlPulsLength  : label is "TRUE";
+  signal sControlPulsLength1                 : std_logic_vector (31 downto 0);
+  attribute ASYNC_REG of sControlPulsLength1 : label is "TRUE";
+
+  signal sSampleStateMachineState : tSampleStateMachineStates;
+  signal sSampleCounterOut        : std_logic_vector (31 downto 0);  -- aktuelle Anzahl der Samples nach einem Sample-Vorgang
+
+  attribute ASYNC_REG : string;
+
+
+begin
+  poFifoResetOut  <= sBufferReset;
+  poFifoWrDataOut <= sBufferDataIn;
+  poFifoRdClkOut  <= sSysClk;
+  poFifoRdEnOut   <= sBufferRdEnable;
+  poFifoWrClkOut  <= sAdcClk;
+  poFifoWrEnOut   <= sBufferWrEnable;
+  sBufferDataOut  <= poFifoRdDataIn;
+  sBufferEmpty    <= poFifoEmptyIn;
+  sBufferFull     <= poFifoFullIn;
+
+---------------------------------------------------------------------------------------
+-- Sync auf ADC-Clock
+  pSyncAdcClock : process (sAdcClk)
+  begin
+    if rising_edge (sAdcClk) then
+      sControlStart1                <= poControlStart;
+      sControlStart                 <= sControlStart1;
+      sControlSelectTestDataAdcClk1 <= poControlSelectTestData;
+      sControlSelectTestDataAdcClk  <= sControlSelectTestDataAdcClk1;
+      sControlPulsLength1           <= poControlPulsLength;
+      sControlPulsLength            <= sControlPulsLength1;
+      sResetAdc1                    <= sResetIntern;
+      sResetAdc                     <= sResetAdc1;
+    end if;
+  end process pSyncAdcClock;
+
+---------------------------------------------------------------------------------------
+-- Sync auf Sys-Clock
+  pSyncSysClock : process (sSysClk)
+  begin
+    if rising_edge (sSysClk) then
+      sBufferFullSysClk1 <= sBufferFull;
+      sBufferFullSysClk  <= sBufferFullSysClk1;
+      sAdcClkOk1         <= sAdcClkOk;
+      poAdcClkOk         <= sAdcClkOk1;
+      sSampleCounterOut  <= std_logic_vector (sSampleCounter);
+      poSampleCounterOut <= sSampleCounterOut;
+    end if;
+  end process pSyncSysClock;
+
+---------------------------------------------------------------------------------------
+-- generiert das Pulssignal
+  pPulsgenerator : process (sAdcClk, sResetAdc) is
+  begin
+    if sResetAdc = '1' then
+      sPulsCounter <= 0;
+    elsif rising_edge (sAdcClk) then
+      sPulsCounter <= sPulsCounter + 1;
+      sPuls        <= sPuls;
+
+      if sPulsCounter = 0 then
+        sPuls <= '1';
+      elsif sPulsCounter = 1 then
+        sPuls <= '0';
+      elsif sPulsCounter >= To_Integer (unsigned (sControlPulsLength)) then
+        sPulsCounter <= 0;
+        sPuls        <= '0';
+      end if;
+    end if;
+  end process pPulsgenerator;
+
+---------------------------------------------------------------------------------------
+-- Sample-Statemachine
+  pSampleStateMachine : process (sAdcClk, sResetAdc) is
+    variable vCounter : integer range 0 to 128 := 0;
+  begin
+    if sResetAdc = '1' then
+      sSampleStateMachineState <= SampleStateMachineIdle;
+      sBufferReset             <= '1';
+      sBufferWrEnable          <= '0';
+      sSampleCounter           <= (others => '0');
+    elsif rising_edge (sAdcClk) then
+      sBufferReset    <= '0';
+      sBufferWrEnable <= '0';
+
+      case sSampleStateMachineState is
+-- warten, bis Start = 1
+        when SampleStateMachineIdle =>
+          if sControlStart = '1' then
+            sSampleStateMachineState <= SampleStateMachineStartConversionHigh;
+          end if;
+
+-- warten, bis Start = 0
+        when SampleStateMachineStartConversionHigh =>
+          if sControlStart = '0' then
+            vCounter                 := 0;
+            sSampleStateMachineState <= SampleStateMachineReset;
+          end if;
+
+        when SampleStateMachineReset =>
+-- Reset am Fifo auslösen
+          sBufferReset <= '1';
+          vCounter     := vCounter + 1;
+          if vCounter = 128 then
+            sSampleStateMachineState <= SampleStateMachineWaitForPulsLow;
+          else
+            sSampleStateMachineState <= SampleStateMachineReset;
+          end if;
+
+-- warten, bis Puls = 0
+        when SampleStateMachineWaitForPulsLow =>
+--            IF sPuls = '0' then
+          sSampleStateMachineState <= SampleStateMachineWaitForPulsHigh;
+--            end if;
+
+-- warten, bis Puls = 1
+        when SampleStateMachineWaitForPulsHigh =>
+          sSampleCounter           <= (others => '0');
+          sBufferWrEnable          <= '1';
+--            IF sPuls = '1' then
+          sSampleStateMachineState <= SampleStateMachineSample;
+--            end if;
+
+-- jetzt samplen, bis bufferfull = 1
+        when SampleStateMachineSample =>
+          sBufferWrEnable <= '1';
+          if sBufferFull = '1' then
+            sSampleStateMachineState <= SampleStateMachineSampleEnd;
+          else
+            sSampleCounter <= sSampleCounter + 1;
+          end if;
+
+-- über process sFinishCapture setzen
+        when SampleStateMachineSampleEnd =>
+          sSampleStateMachineState <= SampleStateMachineIdle;
+
+        when others =>
+          sSampleStateMachineState <= SampleStateMachineIdle;
+      end case;
+    end if;
+  end process pSampleStateMachine;
+
+---------------------------------------------------------------------------------------
+-- Taktkontrolle
+  pTestAdcClk : process (sAdcClk, sResetAdc)
+    variable vCount : integer range 0 to 10 := 0;
+  begin
+    if (sResetAdc = '1') then
+      sAdcClkOk <= '0';
+      vCount    := 0;
+    elsif rising_edge (sAdcClk) then
+      if (vCount < 10) then
+        vCount    := vCount + 1;
+        sAdcClkOk <= '0';
+      elsif (vCount = 10) then
+        sAdcClkOk <= '1';
+      end if;
+    end if;
+  end process;
+
+---------------------------------------------------------------------------------------
+-- internen reset aus ext. reset und reset über userregister bilden
+  sResetIntern <= poControlReset or poResetIn;
+
+-- Systemtakt
+  sSysClk <= poSysClkIn;
+-- ADC-Takt
+  sAdcClk <= poAdcClk;
+
+
+  process (sAdcClk)
+  begin
+    if rising_edge(sAdcClk) then
+      if sControlSelectTestDataAdcClk = '0' then
+        sBufferDataIn (gAdcWidth - 1 downto 0) <= poAdcData;
+      else
+        sBufferDataIn (gAdcWidth - 1 downto 0) <= std_logic_vector (sSampleCounter(gAdcWidth - 1 downto 0));
+      end if;
+    end if;
+  end process;
+
+---------------------------------------------------------------------------------------
+  poPuls           <= sPuls;
+  poFinishCapture  <= sBufferFullSysClk;
+  poSamplesOut     <= sBufferDataOut;
+  poBufferEmptyOut <= sBufferEmpty;
+  sBufferRdEnable  <= poRdEnableIn;
+end aRsmbAdcSampler;

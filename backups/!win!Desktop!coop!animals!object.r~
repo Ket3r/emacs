@@ -1,0 +1,5 @@
+struct OBJECT
+{
+  struct OBJECT_TYPE *type;
+};
+

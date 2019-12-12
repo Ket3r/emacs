@@ -56,6 +56,8 @@
   (doom-themes-org-config))
 
 
+(require 'ace-window)
+(global-set-key "\M-o" 'ace-window)
 
 
 (custom-set-variables
@@ -85,7 +87,22 @@
 ;;------------------------------------------------------------------------------
 (require 'helm-config)
 (helm-mode 1)
+(global-set-key (kbd "M-x") #'helm-M-x)
+(global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
+(global-set-key (kbd "C-x C-f") #'helm-find-files)
+(global-set-key (kbd "C-x b") #'helm-mini)
+(global-set-key (kbd "C-x k") #'kill-this-buffer)
+(global-set-key (kbd "M-y") 'helm-show-kill-ring)
 
+;; The default "C-x c" is quite close to "C-x C-c", which quits Emacs.
+;; Changed to "C-c h". Note: We must set "C-c h" globally, because we
+;; cannot change `helm-command-prefix-key' once `helm-config' is loaded.
+(global-set-key (kbd "C-c h") 'helm-command-prefix)
+(global-unset-key (kbd "C-x c"))
+
+(define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action) ; rebind tab to run persistent action
+(define-key helm-map (kbd "C-i") 'helm-execute-persistent-action) ; make TAB work in terminal
+(define-key helm-map (kbd "C-z")  'helm-select-action) ; list actions using C-z
 
 (setq helm-split-window-in-side-p           t ; open helm buffer inside current window, not occupy whole other window
       helm-move-to-line-cycle-in-source     t ; move to end or beginning of source when reaching top or bottom of source.
@@ -124,52 +141,8 @@
 (auto-revert-mode)
 
 
-;;------------------------------------------------------------------------------
-;; Shortcuts
-
 ;; make C-o and C-O behave similar to VIM
-(global-set-key (kbd "C-o") 'open-line-below)
-(global-set-key (kbd "C-S-o") 'open-line-above)
-
-(global-set-key "\M-o" 'ace-window)
-
-(global-set-key (kbd "<f2>") 'calc-dispatch)
-
-;; Helm bindings
-(global-set-key (kbd "C-S-s") 'helm-occur)
-(global-set-key (kbd "M-x") #'helm-M-x)
-(global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
-(global-set-key (kbd "C-x C-f") #'helm-find-files)
-(global-set-key (kbd "C-x b") #'helm-mini)
-(global-set-key (kbd "C-x k") #'kill-this-buffer)
-(global-set-key (kbd "M-y") 'helm-show-kill-ring)
-;; The default "C-x c" is quite close to "C-x C-c", which quits Emacs.
-;; Changed to "C-c h". Note: We must set "C-c h" globally, because we
-;; cannot change `helm-command-prefix-key' once `helm-config' is loaded.
-(global-set-key (kbd "C-c h") 'helm-command-prefix)
-(global-unset-key (kbd "C-x c"))
-(define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
-(define-key helm-map (kbd "C-i") 'helm-execute-persistent-action) ; make TAB work in terminal
-(define-key helm-map (kbd "C-z")  'helm-select-action)
-
-
-
-
-
-
-
-
 ;;------------------------------------------------------------------------------
-;; Dired
-
-;; Enables Dired to use Directory in a Dired buffer in the other window as default
-(setq dired-dwim-target t)
-;; make 'a' work in dired
-(put 'dired-find-alternate-file 'disabled nil)
-
-;;------------------------------------------------------------------------------
-;; Custom Functions
-
 (defun open-line-above ()
   "inserted line above current position"
   (interactive)
@@ -186,3 +159,11 @@
     (open-line 1)
     )
   )
+(global-set-key (kbd "C-o") 'open-line-below)
+(global-set-key (kbd "C-S-o") 'open-line-above)
+
+
+;; make calc more convenient to use
+;;------------------------------------------------------------------------------
+(global-set-key (kbd "<f2>") 'calc-dispatch)
+(put 'dired-find-alternate-file 'disabled nil)

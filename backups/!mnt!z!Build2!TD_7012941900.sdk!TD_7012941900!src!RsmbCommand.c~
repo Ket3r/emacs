@@ -1,0 +1,473 @@
+/*****************************************************************************/
+/**
+ @file  RsmbCommand.h
+ @originator  Bernd Klotz (BK) Phone 81309
+ @copyright  (c) Rohde & Schwarz, Messgeraetebau GmbH & Co. KG, Memmingen
+
+ @language  C
+ @description  Dekodierung der Commands
+ @see
+
+ @history
+
+ -------------------------------------------------------------------------------
+
+ $Workfile:  $
+ $Author:  $
+
+ $Source:  $
+ $Revision:  $
+ $Date:  $
+
+ ******************************************************************************/
+
+/* INCLUDE FILES *************************************************************/
+#include "string.h"
+#include "RsmbCommand.h"
+#include "RsmbDefinitions.h"
+#include "RsmbSystemInterface.h"
+#include "RsmbCustomInit.h"
+#include "RsmbUtility.h"
+#include "RsmbCommandDefinition.h"
+#include "RsmbSpiFlash.h"
+#include "RsmbAdcTestCpuIf.h"
+#include "xgpio.h"
+#include "flag_checker.h"
+#include "rsmb_axi_to_bus.h"
+
+/* DEFINES *******************************************************************/
+
+/* TYPES DECLARATION *********************************************************/
+
+/* GLOBAL VARIABLES DEFINITION ***********************************************/
+
+/* GLOBAL CONSTANTS DEFINITION ***********************************************/
+
+/* LOCAL FUNCTIONS DEFINITION ************************************************/
+
+/* FORWARD DEFINITION *******************************************************/
+
+/* LOCAL VARIABLES DEFINITION ************************************************/
+
+/* LOCAL CONSTANTS DEFINITION ************************************************/
+
+/* LOCAL FUNCTIONS ***********************************************************/
+
+/* FUNCTION ******************************************************************/
+
+/* FUNCTION **************************************************/
+/**
+ F�hrt das in den SplitParts eingetragene Command aus
+ 
+ @precondition
+ @postcondition
+ @side_effects
+ 
+ @return RETURN_STATUS_...
+ **************************************************************/
+int
+RsmbExecuteCommand (void)
+{
+  unsigned long ulReturnStatus = RETURN_STATUS_ERROR;
+
+  // Setzen der Stati
+  RsmbSysSetSystemErrorStatus (MB_SYS_INACTIVE);
+  RsmbSysSetSystemBusyStatus (MB_SYS_ACTIVE);
+  RsmbSysSetYellowLedStatus (RSMB_SYS_LED_BLINK_FAST);
+  RsmbSysSetRedLedStatus (RSMB_SYS_LED_OFF);
+
+  // Grobe Vorselektion
+  /*************************************************************************/
+  /*** Get Hello World ***/
+  /*************************************************************************/
+  if (0 == strcmp (RsmbGetSplitPart (PARAMETER0), COMMAND_HELLO_WORLD))
+    {
+      RsmbSendResponseString2Jtag (NAME_STRING VERSION_STRING);
+      ulReturnStatus = RETURN_STATUS_OK;
+    }
+  /***********************************************************************************/
+  /*** Schreibe/Lese Adresse ***/
+  /*************************************************************************/
+  else if (0 == strcmp (RsmbGetSplitPart (PARAMETER0), COMMAND_ADDRESS))
+    {
+      if (0 == strcmp (RsmbGetSplitPart (PARAMETER1), COMMAND_SET))
+	{
+	  RsmbSetAddress (RsmbStringToUl (RsmbGetSplitPart (PARAMETER2)),
+			  RsmbStringToUl (RsmbGetSplitPart (PARAMETER3)),
+			  RsmbStringToUl (RsmbGetSplitPart (PARAMETER4)));
+	  ulReturnStatus = RETURN_STATUS_OK;
+	}
+      else if (0 == strcmp (RsmbGetSplitPart (PARAMETER1), COMMAND_GET))
+	{
+	  ulReturnStatus = RsmbSendResponseValue2Jtag (
+	      RsmbGetAddress (RsmbStringToUl (RsmbGetSplitPart (PARAMETER2)),
+			      RsmbStringToUl (RsmbGetSplitPart (PARAMETER3))));
+	}
+      else
+	{
+	  ulReturnStatus = RETURN_STATUS_WRONG_COMMAND;
+	}
+    }
+
+  /*************************************************************************/
+  /*** SPI Flash ***/
+  /*************************************************************************/
+  else if (0 == strcmp (RsmbGetSplitPart (PARAMETER0), COMMAND_SPIFLASH))
+    {
+      /*************************************************************************/
+      /* Device ID */
+      if (0
+	  == strcmp (RsmbGetSplitPart (PARAMETER1), COMMAND_SPIFLASH_DEVICE_ID))
+	{
+	  ulReturnStatus = RsmbSpiFlashReadDeviceId ();
+	}
+      /*************************************************************************/
+      /* Chiperase */
+      else if (0
+	  == strcmp (RsmbGetSplitPart (PARAMETER1), COMMAND_SPIFLASH_CHIPERASE))
+	{
+	  ulReturnStatus = RsmbSpiFlashChipErase ();
+	}
+      /*************************************************************************/
+      /* Sector Erase */
+      else if (0 == strcmp (RsmbGetSplitPart (PARAMETER1),
+      COMMAND_SPIFLASH_SECTORERASE))
+	{
+	  ulReturnStatus = RsmbSpiFlashSectorErase (
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER2)));
+	}
+      /*************************************************************************/
+      /* Programming */
+      else if (0
+	  == strcmp (RsmbGetSplitPart (PARAMETER1), COMMAND_SPIFLASH_PROG))
+	{
+	  ulReturnStatus = RsmbSpiFlashProgram (
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER2)),
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER3)),
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER4)));
+	}
+
+      /*************************************************************************/
+      /* Reading */
+      else if (0
+	  == strcmp (RsmbGetSplitPart (PARAMETER1), COMMAND_SPIFLASH_READ))
+	{
+	  ulReturnStatus = RsmbSpiFlashRead (
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER2)),
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER3)),
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER4)));
+	}
+      /*************************************************************************/
+      /* CRC */
+      else if (0
+	  == strcmp (RsmbGetSplitPart (PARAMETER1), COMMAND_SPIFLASH_CRC))
+	{
+	  ulReturnStatus = RsmbSpiFlashModulCrc (
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER2)),
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER3)),
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER4)));
+	}
+      /*************************************************************************/
+      /* Blankcheck */
+      else if (0 == strcmp (RsmbGetSplitPart (PARAMETER1),
+      COMMAND_SPIFLASH_BLANKCHECK))
+	{
+	  ulReturnStatus = RsmbSpiFlashModulBlankCheck (
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER2)),
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER3)),
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER4)));
+	}
+      /*************************************************************************/
+      /* Write Status Register */
+      else if (0 == strcmp (RsmbGetSplitPart (PARAMETER1),
+      COMMAND_SPIFLASH_WRITESTATUSREG))
+	{
+	  ulReturnStatus = RsmbSpiFlashSetStatusReg (
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER2)));
+	}
+      /*************************************************************************/
+      /* Read Status Register */
+      else if (0 == strcmp (RsmbGetSplitPart (PARAMETER1),
+      COMMAND_SPIFLASH_READSTATUSREG))
+	{
+	  unsigned char *tmp = NULL;
+	  ulReturnStatus = RsmbSpiFlashGetStatusReg (tmp);
+	}
+      /*************************************************************************/
+      /* Write Register */
+      else if (0 == strcmp (RsmbGetSplitPart (PARAMETER1),
+      COMMAND_SPIFLASH_WRITEREGISTER))
+	{
+	  ulReturnStatus = RsmbSpiFlashWriteRegister (
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER2)),
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER3)),
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER4)),
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER5)));
+	}
+      /*************************************************************************/
+      /* Read Register */
+      else if (0 == strcmp (RsmbGetSplitPart (PARAMETER1),
+      COMMAND_SPIFLASH_READREGISTER))
+	{
+	  ulReturnStatus = RsmbSpiFlashReadRegister (
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER2)),
+	      RsmbStringToUl (RsmbGetSplitPart (PARAMETER3)));
+	}
+      /*************************************************************************/
+      /* Set CS */
+      else if (0
+	  == strcmp (RsmbGetSplitPart (PARAMETER1), COMMAND_SPIFLASH_SET_CS))
+	{
+	  RsmbSpiFlashSetCs (RsmbStringToUl (RsmbGetSplitPart (PARAMETER2)));
+	  ulReturnStatus = RETURN_STATUS_OK;
+	}
+      /*************************************************************************/
+      /* unknown command */
+      else
+	{
+	  ulReturnStatus = RETURN_STATUS_WRONG_COMMAND;
+	}
+    }
+  /*************************************************************************/
+  /*** ADC_TEST ***/
+  /*************************************************************************/
+  else if (0 == strcmp (RsmbGetSplitPart (PARAMETER0), COMMAND_ADC))
+    {
+      //unsigned long ulAdcBaseAddr = XPAR_RSMB_ADC_TEST_CPUIF_AXI_0_S00_AXI_BASEADDR;
+      unsigned long ulAdcBaseAddr =
+      XPAR_ADC_TEST_RSMB_ADC_TEST_0_S00_AXI_BASEADDR;
+      unsigned long ulCounter;
+      unsigned long ulData;
+      unsigned long ulMaxSamples;
+      unsigned long ulSamples;
+
+      ulReturnStatus = RsmbAdcTestCpuIfSample (
+	  ulAdcBaseAddr, RsmbStringToUl (RsmbGetSplitPart (PARAMETER2)));
+
+      if (RETURN_STATUS_OK == ulReturnStatus)
+	{
+	  // Maximale Anzahl der Samples holen
+	  ulMaxSamples = RsmbAdcTestCpuIfGetNumberOfSamples (ulAdcBaseAddr) * 8;
+	  // Uebergeben Anzahl der Samples
+	  ulSamples = RsmbStringToUl (RsmbGetSplitPart (PARAMETER1));
+
+	  // Wenn uebergeben Anzahl der Samples groesser FIFO, dann begrenzen
+	  if ((ulMaxSamples < ulSamples) || (0 == ulSamples))
+	    {
+	      ulSamples = ulMaxSamples;
+	    }
+
+	  // Breite eines Datenworts in Bytes an den PC schicken
+	  RsmbSendResponseValue2Jtag (4);
+
+	  // Anzahl der Samples an den PC schicken
+	  RsmbSendResponseValue2Jtag (ulSamples);
+
+	  if (0 != ulMaxSamples)
+	    {
+	      RsmbInitDataTransfer ();
+
+	      // jetzt Daten senden
+	      for (ulCounter = 0; ulCounter < ulSamples; ulCounter++)
+		{
+		  ulReturnStatus = RsmbAdcTestCpuIfGetSampleData (
+		  XPAR_ADC_TEST_RSMB_ADC_TEST_0_S00_AXI_BASEADDR,
+								  &ulData);
+
+		  if (RETURN_STATUS_OK != ulReturnStatus)
+		    {
+		      break;
+		    }
+		  RsmbSetJtagData (ulData);
+		}
+
+	      RsmbFinishDataTransfer ();
+
+	      RsmbSetJtagData (0);
+	    }
+	  else
+	    {
+	      ulReturnStatus = RETURN_STATUS_TIMEOUT;
+	    }
+	}
+    }
+  /*************************************************************************/
+  /*** Control LEDS ***/
+  /*************************************************************************/
+  else if (0 == strcmp (RsmbGetSplitPart (PARAMETER0), COMMAND_LED))
+    {
+      XGpio_WriteReg(XPAR_LED_SWITCHING_AXI_LEDS_BASEADDR, 0,
+		     RsmbStringToUl(RsmbGetSplitPart(PARAMETER1)));
+      ulReturnStatus = RETURN_STATUS_OK;
+    }
+
+  /*************************************************************************/
+  /*** Control MUX ***/
+  /*************************************************************************/
+  else if (0 == strcmp (RsmbGetSplitPart (PARAMETER0), COMMAND_MUX))
+    {
+      XGpio_WriteReg(XPAR_AXI_SELFTEST_MUX_BASEADDR, 0,
+		     RsmbStringToUl(RsmbGetSplitPart(PARAMETER1)));
+      ulReturnStatus = RETURN_STATUS_OK;
+    }
+
+  /*************************************************************************/
+  /*** Control Flag Checker ***/
+  /*************************************************************************/
+  else if (0 == strcmp (RsmbGetSplitPart (PARAMETER0), COMMAND_FLAG))
+    {
+      // OVLD
+      if (0 == strcmp (RsmbGetSplitPart (PARAMETER1), COMMAND_FLAG_OVLD))
+	{
+	  if (0 == strcmp (RsmbGetSplitPart (PARAMETER2), COMMAND_GET))
+	    {
+	      unsigned long ulTmp = ReadFlags (XPAR_FLAG_CHECKER_OVLD_S00_AXI_BASEADDR);
+	      RsmbSendResponseValue2Jtag (ulTmp);
+	      ulReturnStatus = RETURN_STATUS_OK;
+	    }
+	  else if (0
+	      == strcmp (RsmbGetSplitPart (PARAMETER2), COMMAND_FLAG_RESET))
+	    {
+	      ResetFlags (XPAR_FLAG_CHECKER_OVLD_S00_AXI_BASEADDR);
+	      ulReturnStatus = RETURN_STATUS_OK;
+	    }
+	  else
+	    {
+	      ulReturnStatus = RETURN_STATUS_WRONG_COMMAND;
+	    }
+	  //NFAULT
+	}
+      else if (0 == strcmp (RsmbGetSplitPart (PARAMETER1), COMMAND_FLAG_NFAULT))
+	{
+	  if (0 == strcmp (RsmbGetSplitPart (PARAMETER2), COMMAND_GET))
+	    {
+	      ulReturnStatus = ReadFlags (
+	      XPAR_FLAG_CHECKER_NFAULT_S00_AXI_BASEADDR);
+	    }
+	  else if (0
+	      == strcmp (RsmbGetSplitPart (PARAMETER2), COMMAND_FLAG_RESET))
+	    {
+	      ResetFlags (XPAR_FLAG_CHECKER_NFAULT_S00_AXI_BASEADDR);
+	      ulReturnStatus = RETURN_STATUS_OK;
+	    }
+	  else
+	    {
+	      ulReturnStatus = RETURN_STATUS_WRONG_COMMAND;
+	    }
+	}
+      else
+	{
+	  ulReturnStatus = RETURN_STATUS_WRONG_COMMAND;
+	}
+    }
+
+  /*************************************************************************/
+  /*** PI BUS ADC ***/
+  /*************************************************************************/
+  else if (0 == strcmp (RsmbGetSplitPart (PARAMETER0), COMMAND_ADC_PI))
+    {
+      if (0 == strcmp (RsmbGetSplitPart (PARAMETER0), COMMAND_GET))
+	{
+	  unsigned long ulData;
+	  ulData = RSMB_AXI_TO_BUS_mReadReg(
+	      XPAR_PIADCINST_S00_AXI_BASEADDR,
+	      RsmbStringToUl(RsmbGetSplitPart(PARAMETER2)));
+	  RsmbSendResponseValue2Jtag (ulData);
+	  ulReturnStatus = RETURN_STATUS_OK;
+	}
+      else if (0 == strcmp (RsmbGetSplitPart (PARAMETER0), COMMAND_SET))
+	{
+	  RSMB_AXI_TO_BUS_mWriteReg(
+	      XPAR_PIADCINST_S00_AXI_BASEADDR,
+	      RsmbStringToUl(RsmbGetSplitPart(PARAMETER2)),
+	      RsmbStringToUl(RsmbGetSplitPart(PARAMETER3)));
+	  ulReturnStatus = RETURN_STATUS_OK;
+	}
+      else
+	{
+	  ulReturnStatus = RETURN_STATUS_WRONG_COMMAND;
+	}
+    }
+
+  /*************************************************************************/
+  /*** PI SPI BUS ADC ***/
+  /*************************************************************************/
+  else if (0 == strcmp (RsmbGetSplitPart (PARAMETER0), COMMAND_ADC_SPI))
+    {
+      if (0 == strcmp (RsmbGetSplitPart (PARAMETER0), COMMAND_GET))
+	{
+	  unsigned long ulData;
+	  ulData = RSMB_AXI_TO_BUS_mReadReg(
+	      XPAR_PIADCSPI_S00_AXI_BASEADDR,
+	      RsmbStringToUl(RsmbGetSplitPart(PARAMETER2)));
+	  RsmbSendResponseValue2Jtag (ulData);
+	  ulReturnStatus = RETURN_STATUS_OK;
+	}
+      else if (0 == strcmp (RsmbGetSplitPart (PARAMETER0), COMMAND_SET))
+	{
+	  RSMB_AXI_TO_BUS_mWriteReg(
+	      XPAR_PIADCSPI_S00_AXI_BASEADDR,
+	      RsmbStringToUl(RsmbGetSplitPart(PARAMETER2)),
+	      RsmbStringToUl(RsmbGetSplitPart(PARAMETER3)));
+	  ulReturnStatus = RETURN_STATUS_OK;
+	}
+      else
+	{
+	  ulReturnStatus = RETURN_STATUS_WRONG_COMMAND;
+	}
+    }
+
+#if 0
+  /*************************************************************************/
+  /*** ... ***/
+  /*************************************************************************/
+  else if (0 == strcmp (RsmbGetSplitPart (PARAMETER0), COMMAND_))
+    {
+      /*************************************************************************/
+      /* ... */
+      if (0 == strcmp (RsmbGetSplitPart (PARAMETER1), COMMAND_))
+	{
+	  if (0 == strcmp (RsmbGetSplitPart (PARAMETER1), COMMAND_))
+	    {
+	      ulReturnStatus = RsmbFunktion...();
+	    }
+	  else
+	    {
+	      ulReturnStatus = RETURN_STATUS_WRONG_COMMAND;
+	    }
+	}
+      else if (0 == strcmp (RsmbGetSplitPart (PARAMETER1), COMMAND_))
+	{
+	  if (0 == strcmp (RsmbGetSplitPart (PARAMETER1), COMMAND_))
+	    {
+	      ulReturnStatus = RsmbFunktion...();
+	    }
+	  else
+	    {
+	      ulReturnStatus = RETURN_STATUS_WRONG_COMMAND;
+	    }
+	}
+      /*************************************************************************/
+      else
+	{
+	  ulReturnStatus = RETURN_STATUS_WRONG_COMMAND;
+	}
+    }
+#endif
+
+  else
+    {
+      ulReturnStatus = RETURN_STATUS_WRONG_COMMAND;
+    }
+
+  // Setzen der Stati
+  RsmbSysSetSystemBusyStatus (MB_SYS_INACTIVE);
+  RsmbSysSetYellowLedStatus (RSMB_SYS_LED_BLINK_SLOW);
+
+  if (RETURN_STATUS_OK != ulReturnStatus)
+    {
+      RsmbSysSetSystemErrorStatus (MB_SYS_ACTIVE);
+    }
+
+  return ulReturnStatus;
+}

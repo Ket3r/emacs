@@ -1,0 +1,23 @@
+#include "object.h"
+#include <stdio.h>
+
+
+static int init(struct OBJECT *self)
+{
+  self->size = sizeof(*self);
+  self->type = object_type;
+  printf("Hello I am tp_init in object.c");
+}
+
+static int finalize(struct OBJECT *self)
+{
+  printf("Hello I am tp_finalize in object.c");
+}
+
+struct OBJECT_TYPE object_type_instance =
+  {
+   &init,
+   &finalize
+  };
+  
+struct OBJECT_TYPE *object_type = &object_type_instance;

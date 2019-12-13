@@ -1,5 +1,11 @@
+#ifndef OBJECT_R
+#define OBJECT_R
+
+
 struct OBJECT
 {
   struct OBJECT_TYPE *type;
+  unsigned size;
 };
 
+#endif

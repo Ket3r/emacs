@@ -23,7 +23,7 @@
 
 (setq mac-command-modifier 'meta)
  
-(set-frame-font "Fantasque Sans Mono 16")
+(set-frame-font "Fantasque Sans Mono 15")
 
 
 (package-initialize)
@@ -126,7 +126,11 @@
 
 ;; I ususally always wanna see the new stuff.
 ;;------------------------------------------------------------------------------
-(auto-revert-mode)
+(setq global-auto-revert-mode 1)
+
+;; Pls no tabs this sucks with other editors like SDK
+;;------------------------------------------------------------------------------
+(setq-default indent-tabs-mode nil)
 
 
 ;;------------------------------------------------------------------------------

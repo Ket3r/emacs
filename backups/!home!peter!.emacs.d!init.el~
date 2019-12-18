@@ -126,7 +126,11 @@
 
 ;; I ususally always wanna see the new stuff.
 ;;------------------------------------------------------------------------------
-(auto-revert-mode)
+(setq global-auto-revert-mode 1)
+
+;; Pls no tabs this sucks with other editors like SDK
+;;------------------------------------------------------------------------------
+(setq-default indent-tabs-mode nil)
 
 
 ;;------------------------------------------------------------------------------
@@ -139,6 +143,8 @@
 (global-set-key "\M-o" 'ace-window)
 
 (global-set-key (kbd "<f2>") 'calc-dispatch)
+
+(global-set-key (kbd "\M-/") 'dabbrev-expand)
 
 ;; Helm bindings
 (global-set-key (kbd "C-S-s") 'helm-occur)
@@ -191,3 +197,6 @@
     (open-line 1)
     )
   )
+
+(defun insert-current-date () (interactive)
+       (insert (shell-command-to-string "echo -n $(date +%Y-%m-%d-%H-%M)")))

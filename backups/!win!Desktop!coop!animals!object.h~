@@ -3,13 +3,20 @@
 
 #include "object.r"
 
+#define CURRENT_TYPE struct OBJECT
+#define OBJECT_FUNCTIONS                \
+  int (*init)(CURRENT_TYPE *);         \
+  int (*finalize)(CURRENT_TYPE  *);    
+
+
 struct OBJECT_TYPE
 {
-  int (*tp_init)(struct OBJECT *);
-  int (*tp_finalize)(struct OBJECT *);
+  OBJECT_FUNCTIONS
 };
 
-extern struct OBJECT_TYPE object_type_instance;
+int ObjectTypeInit(struct OBJECT_TYPE *p);
+
+
 extern struct OBJECT_TYPE *object_type;
 
 

@@ -23,7 +23,7 @@
 
 (setq mac-command-modifier 'meta)
  
-(set-frame-font "Fantasque Sans Mono 15")
+(set-frame-font "Fantasque Sans Mono 13")
 
 
 (package-initialize)
@@ -144,6 +144,8 @@
 
 (global-set-key (kbd "<f2>") 'calc-dispatch)
 
+(global-set-key (kbd "M-/") 'dabbrev-expand)
+
 ;; Helm bindings
 (global-set-key (kbd "C-S-s") 'helm-occur)
 (global-set-key (kbd "M-x") #'helm-M-x)
@@ -195,3 +197,7 @@
     (open-line 1)
     )
   )
+
+(defun insert-current-date () (interactive)
+       (insert (shell-command-to-string "echo -n $(date +%Y-%m-%d-%H-%M)")))
+

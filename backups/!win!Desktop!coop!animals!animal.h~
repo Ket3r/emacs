@@ -5,17 +5,27 @@
 #include "animal.r"
 #include "object.h"
 
+// redefine current type to the object struct of this class
+#undef CURRENT_TYPE
+#define CURRENT_TYPE struct ANIMAL
+
+// public functions of animal
+#define ANIMAL_FUNCTIONS                \
+  OBJECT_FUNCTIONS                      \
+  int (*makeNoise)(struct ANIMAL *);    \
+  int (*sleep)(struct ANIMAL *);        \
+  int (*roam)(struct ANIMAL *);
+// don't forget last semicolon
+
 struct ANIMAL;
 
 struct ANIMAL_TYPE
 {
-  struct OBJECT_TYPE base;
-  int (*makeNoise)(struct ANIMAL *);
-  int (*sleep)(struct ANIMAL *);
-  int (*roam)(struct ANIMAL *);
+  ANIMAL_FUNCTIONS
 };
 
-extern struct ANIMAL_TYPE animal_type_instance;
 extern struct ANIMAL_TYPE *animal_type;
+
+int AnimalTypeInit(struct ANIMAL_TYPE *p);
 
 #endif

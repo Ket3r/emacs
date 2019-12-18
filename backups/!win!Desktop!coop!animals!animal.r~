@@ -1,13 +1,14 @@
 #ifndef ANIMAL_R
 #define ANIMAL_R
 
-#include "animal.h"
+#include "object.r"
 
 struct ANIMAL
 {
   struct OBJECT base;
   unsigned weight;
 };
+
 
 #endif
 

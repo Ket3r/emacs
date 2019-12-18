@@ -2,28 +2,10 @@
 #include <stdio.h>
 #include <string.h>
 
+struct ANIMAL_TYPE *animal_type = NULL;
 
-static int init_type(struct OBJECT_TYPE *self, void *base, unsigned base_size)
+static int init(struct ANIMAL *self)
 {
-  
-}
-
-static int init(struct OBJECT *self)
-{
-  //init Type
-  //--------------------------------------------------------------------------------
-  
-  // Copy the base class into the current class
-  memcpy(&animal_type -> base, ANIMAL_BASE_TYPE, sizeof(*object_type));
-
-  // Override the tp_init function since we want this function to initialize our class
-  animal_type
-
-
-//call base class init
-object_type -> tp_init(self);
-
-//do custom init
 
 printf("animal is initializing ...\n");
 
@@ -44,6 +26,21 @@ static int roam(struct ANIMAL *self)
   printf("Animal: roams around...");
 }
 
-struct ANIMAL_TYPE animal_type_instance = (struct ANIMAL_TYPE) {&init, 0};
-struct ANIMAL_TYPE *animal_type = &animal_type_instance;
+int AnimalTypeInit(struct ANIMAL_TYPE *o)
+{
+  static struct ANIMAL_TYPE animal_type_instance = { 0 };
+  static int initialized = 0;
+
+  if (0 == initialized)
+    {
+      //init superclass/supertype
+      ObjectTypeInit(object_type);
+      memcpy(animal_type, object_type, sizeof(object_type));
+      animal_type -> makeNoise = &makeNoise;
+      animal_type -> sleep = &sleep;
+      animal_type -> roam = &roam;
+    }
+  return 0;
+}
+
 

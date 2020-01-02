@@ -23,7 +23,7 @@
 
 (setq mac-command-modifier 'meta)
  
-(set-frame-font "Fantasque Sans Mono 13")
+(set-frame-font "Fantasque Sans Mono 18")
 
 
 (package-initialize)
@@ -150,7 +150,7 @@
 (global-set-key (kbd "M-/") 'dabbrev-expand)
 
 ;; Helm bindings
-(global-set-key (kbd "C-S-s") 'helm-occur)
+(global-set-key (kbd "C-S-d") 'helm-occur)
 (global-set-key (kbd "M-x") #'helm-M-x)
 (global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
 (global-set-key (kbd "C-x C-f") #'helm-find-files)
@@ -218,3 +218,7 @@ end of the file"
     (goto-char (point-max))
     (insert "#endif /* " define-name " */")))
 
+(defun mycompile()
+  (interactive)
+  (compile "make"))
+(define-key c-mode-map (kbd "C-c C-c") 'mycompile)

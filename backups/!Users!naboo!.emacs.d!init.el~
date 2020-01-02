@@ -23,7 +23,7 @@
 
 (setq mac-command-modifier 'meta)
  
-(set-frame-font "Fantasque Sans Mono 15")
+(set-frame-font "Fantasque Sans Mono 18")
 
 
 (package-initialize)
@@ -147,8 +147,10 @@
 
 (global-set-key (kbd "<f2>") 'calc-dispatch)
 
+(global-set-key (kbd "M-/") 'dabbrev-expand)
+
 ;; Helm bindings
-(global-set-key (kbd "C-S-s") 'helm-occur)
+(global-set-key (kbd "C-S-d") 'helm-occur)
 (global-set-key (kbd "M-x") #'helm-M-x)
 (global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
 (global-set-key (kbd "C-x C-f") #'helm-find-files)
@@ -198,9 +200,22 @@
     (open-line 1)
     )
   )
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+
+(defun insert-current-date () 
+  "Inserts the timstamp year-month-day-hour-minute"
+  (interactive)
+  (insert (shell-command-to-string "echo -n $(date +%Y-%m-%d-%H-%M)")))
+
+
+(defun c-insert-header-guard (define-name)
+  "Insert a headerguard with ifndef at beginning and
+end of the file"
+  (interactive "sInsert name of the define: ")
+  (save-excursion
+    (goto-char (point-min))
+    (insert "#ifndef " define-name "\n")
+    (insert "#define " define-name "\n")    
+    (goto-char (point-max))
+    (insert "#endif /* " define-name " */")))
+
+(define-key c-mode-map (kbd "C-c C-c") (funcall (compile "make")))

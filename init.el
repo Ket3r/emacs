@@ -149,6 +149,9 @@
 
 (global-set-key (kbd "M-/") 'dabbrev-expand)
 
+(global-set-key (kbd "<f1>") 'helm-man-woman)
+
+
 ;; Helm bindings
 (global-set-key (kbd "C-S-d") 'helm-occur)
 (global-set-key (kbd "M-x") #'helm-M-x)
@@ -165,7 +168,6 @@
 (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
 (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action) ; make TAB work in terminal
 (define-key helm-map (kbd "C-z")  'helm-select-action)
-
 
 
 
@@ -218,7 +220,8 @@ end of the file"
     (goto-char (point-max))
     (insert "#endif /* " define-name " */")))
 
+
 (defun mycompile()
   (interactive)
   (compile "make"))
-(define-key c-mode-map (kbd "C-c C-c") 'mycompile)
+;;(define-key c-mode-map (kbd "C-c C-c") 'mycompile)

@@ -23,7 +23,7 @@
 
 (setq mac-command-modifier 'meta)
  
-(set-frame-font "Fantasque Sans Mono 13")
+(set-frame-font "Fantasque Sans Mono 18")
 
 
 (package-initialize)
@@ -154,6 +154,7 @@
 
 
 
+
 (require 'helm-config)
 (define-key global-map [remap find-file] 'helm-find-files)
 (define-key global-map [remap occur] 'helm-occur)
@@ -164,10 +165,6 @@
 (unless (boundp 'completion-in-region-function)
   (define-key lisp-interaction-mode-map [remap completion-at-point] 'helm-lisp-completion-at-point)
   (define-key emacs-lisp-mode-map       [remap completion-at-point] 'helm-lisp-completion-at-point))
-;;
-;;;; Helm bindings
-;;;;(global-unset-key (kbd "C-S-s"))
-(global-set-key (kbd "C-x b") #'helm-mini)
 (global-set-key (kbd "M-y") 'helm-show-kill-ring)
 ;; The default "C-x c" is quite close to "C-x C-c", which quits Emacs.
 ;; Changed to "C-c h". Note: We must set "C-c h" globally, because we
@@ -224,6 +221,7 @@ end of the file"
     (insert "#endif /* " define-name " */")))
 
 
+
 (put 'dired-find-alternate-file 'disabled nil)
 
 
@@ -236,3 +234,9 @@ end of the file"
                                          (list "proxy.rsint.net:80"
                                                (cons "Input your LDAP UID !"
                                                      (base64-encode-string "kempte_p:DkKyLNy3.")))))
+
+(defun mycompile()
+  (interactive)
+  (compile "make"))
+;;(define-key c-mode-map (kbd "C-c C-c") 'mycompile)
+

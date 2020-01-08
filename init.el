@@ -225,3 +225,6 @@ end of the file"
   (interactive)
   (compile "make"))
 ;;(define-key c-mode-map (kbd "C-c C-c") 'mycompile)
+
+
+(add-to-list 'helm-completion-styles-alist '(shell-mode . helm-fuzzy))

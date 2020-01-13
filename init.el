@@ -23,7 +23,7 @@
 
 (setq mac-command-modifier 'meta)
  
-(set-frame-font "Fantasque Sans Mono 18")
+(set-frame-font "Fantasque Sans Mono 14")
 
 
 (package-initialize)
@@ -153,11 +153,15 @@
 
 
 ;; Helm bindings
-(global-set-key (kbd "C-S-d") 'helm-occur)
-(global-set-key (kbd "M-x") #'helm-M-x)
+(define-key global-map [remap find-file] 'helm-find-files)
+(define-key global-map [remap occur] 'helm-occur)
+(define-key global-map [remap list-buffers] 'helm-buffers-list)
+(define-key global-map [remap dabbrev-expand] 'helm-dabbrev)
+(define-key global-map [remap execute-extended-command] 'helm-M-x)
+(define-key global-map [remap apropos-command] 'helm-apropos)
+
 (global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
-(global-set-key (kbd "C-x C-f") #'helm-find-files)
-(global-set-key (kbd "C-x b") #'helm-mini)
+;;(global-set-key (kbd "C-x b") #'helm-mini)
 (global-set-key (kbd "C-x k") #'kill-this-buffer)
 (global-set-key (kbd "M-y") 'helm-show-kill-ring)
 ;; The default "C-x c" is quite close to "C-x C-c", which quits Emacs.

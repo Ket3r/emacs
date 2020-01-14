@@ -165,7 +165,7 @@
 ;;(global-set-key (kbd "C-x b") #'helm-mini)
 (global-set-key (kbd "C-x k") #'kill-this-buffer)
 (define-key lisp-interaction-mode-map [remap completion-at-point] 'helm-lisp-completion-at-point)
-(define-key emacs-lisp-mode-map       [remap completion-at-point] 'helm-lisp-completion-at-point
+(define-key emacs-lisp-mode-map       [remap completion-at-point] 'helm-lisp-completion-at-point)
 (global-set-key (kbd "M-y") 'helm-show-kill-ring)
 (global-set-key (kbd "C-x b") 'helm-mini)
 ;; The default "C-x c" is quite close to "C-x C-c", which quits Emacs.

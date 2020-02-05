@@ -23,7 +23,7 @@
 
 (setq mac-command-modifier 'meta)
 (if (string-equal system-type "darwin")
-    (set-frame-font "Fantasque Sans Mono 18")
+    (set-frame-font "Fantasque Sans Mono 16")
   (set-frame-font "Fantasque Sans Mono 14"))
 
 

@@ -247,10 +247,3 @@ end of the file"
   (compile "make"))
 ;;(define-key c-mode-map (kbd "C-c C-c") 'mycompile)
 (put 'dired-find-alternate-file 'disabled nil)
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )

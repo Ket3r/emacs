@@ -231,13 +231,13 @@ end of the file"
 
 
 (setq url-proxy-services
-       '(("no_proxy" . "^\\(localhost\\|10.*\\)")
-         ("http" . "proxy.rsint.net:80")
-         ("https" . "proxy.rsint.net:80")))
+           '(("no_proxy" . "^\\(localhost\\|10.*\\)")
+             ("http" . "proxy.rsint.net:80")
+             ("https" . "proxy.rsint.net:80")))
 
-(setq url-http-proxy-basic-auth-storage (list
-                                         (list "proxy.rsint.net:80"
-                                               (cons "Input your LDAP UID !"
+     (setq url-http-proxy-basic-auth-storage (list
+                                              (list "proxy.rsint.net:80"
+                                                    (cons "Input your LDAP UID !"
                                                      (base64-encode-string "kempte_p:DkKyLNy3.")))))
 
 (defun mycompile()

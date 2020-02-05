@@ -22,8 +22,10 @@
 
 
 (setq mac-command-modifier 'meta)
- 
-(set-frame-font "Fantasque Sans Mono 14")
+(if (string-equal system-type "darwin")
+    (set-frame-font "Fantasque Sans Mono 18")
+  (set-frame-font "Fantasque Sans Mono 14"))
+
 
 
 (package-initialize)

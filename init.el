@@ -152,6 +152,10 @@
 
 (global-set-key (kbd "C-x k") 'kill-this-buffer)
 
+;; make tab switching available
+(global-set-key (kbd "C-<tab>") 'next-multiframe-window)
+(global-set-key (kbd "<C-iso-lefttab>") 'previous-multiframe-window)
+
 
 (require 'helm-config)
 (define-key global-map [remap find-file] 'helm-find-files)

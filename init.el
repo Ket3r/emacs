@@ -166,7 +166,7 @@
 (define-key global-map [remap execute-extended-command] 'helm-M-x)
 (define-key global-map [remap apropos-command] 'helm-apropos)
 (global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
-;;(global-set-key (kbd "C-x b") #'helm-mini)
+(global-set-key (kbd "C-x b") #'helm-mini)
 (global-set-key (kbd "C-x k") #'kill-this-buffer)
 (define-key lisp-interaction-mode-map [remap completion-at-point] 'helm-lisp-completion-at-point)
 (define-key emacs-lisp-mode-map       [remap completion-at-point] 'helm-lisp-completion-at-point)
@@ -230,15 +230,15 @@ end of the file"
 
 
 
-(setq url-proxy-services
-           '(("no_proxy" . "^\\(localhost\\|10.*\\)")
-             ("http" . "proxy.rsint.net:80")
-             ("https" . "proxy.rsint.net:80")))
+;; (setq url-proxy-services
+;;        '(("no_proxy" . "^\\(localhost\\|10.*\\)")
+;;          ("http" . "proxy.rsint.net:80")
+;;          ("https" . "proxy.rsint.net:80")))
 
-     (setq url-http-proxy-basic-auth-storage (list
-                                              (list "proxy.rsint.net:80"
-                                                    (cons "Input your LDAP UID !"
-                                                     (base64-encode-string "kempte_p:DkKyLNy3.")))))
+;; (setq url-http-proxy-basic-auth-storage (list
+;;                                          (list "proxy.rsint.net:80"
+;;                                                (cons "Input your LDAP UID !"
+;;                                                      (base64-encode-string "kempte_p:DkKyLNy3.")))))
 
 (defun mycompile()
   (interactive)

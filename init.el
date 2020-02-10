@@ -71,7 +71,7 @@
    (quote
     ("e1ef2d5b8091f4953fe17b4ca3dd143d476c106e221d92ded38614266cea3c8b" "ca849ae0c889eb918785cdc75452b1e11a00848a5128a95a23872e0119ccc8f4" "6bacece4cf10ea7dd5eae5bfc1019888f0cb62059ff905f37b33eec145a6a430" "bc836bf29eab22d7e5b4c142d201bcce351806b7c1f94955ccafab8ce5b20208" "1c8171893a9a0ce55cb7706766e57707787962e43330d7b0b6b0754ed5283cda" "ec8246f6f74bfe0230521412d88092342c17c1c0448a4b8ba39bddd3da170590" "0809c08440b51a39c77ec5529f89af83ab256a9d48107b088d40098ce322c7d8" "774aa2e67af37a26625f8b8c86f4557edb0bac5426ae061991a7a1a4b1c7e375" "615123f602c56139c8170c153208406bf467804785007cdc11ba73d18c3a248b" "07e3a1323eb29844e0de052b05e21e03ae2f55695c11f5d68d61fb5fed722dd2" "1ed5c8b7478d505a358f578c00b58b430dde379b856fbcb60ed8d345fc95594e" "88a3c267ce2132defd46f2a4761925983dcbc35b1c3cfff1dded164ce169fed4" "229c5cf9c9bd4012be621d271320036c69a14758f70e60385e87880b46d60780" "2cdc13ef8c76a22daa0f46370011f54e79bae00d5736340a5ddfe656a767fddf" "d5f8099d98174116cba9912fe2a0c3196a7cd405d12fa6b9375c55fc510988b5" "be9645aaa8c11f76a10bcf36aaf83f54f4587ced1b9b679b55639c87404e2499" "41039913efab185af1ec1b13ff4df36d6941994d5e3dee39791f30fcd94b42be" "e47c0abe03e0484ddadf2ae57d32b0f29f0b2ddfe7ec810bd6d558765d9a6a6c" "8c75e2bdf8d1293c77a752dd210612cfb99334f7edd360a42a58a8497a078b35" "a4b9eeeabde73db909e6b080baf29d629507b44276e17c0c411ed5431faf87dd" "a02836a5807a687c982d47728e54ff42a91bc9e6621f7fe7205b0225db677f07" "dc677c8ebead5c0d6a7ac8a5b109ad57f42e0fe406e4626510e638d36bcc42df" "6cbf6003e137485fb3f904e76fb15bc48abc386540f43f54e2a47a9884e679f6" default)))
  '(helm-completion-style (quote emacs))
- '(lsp-vhdl-server (quote hdl-checker) t)
+;; '(lsp-vhdl-server (quote hdl-checker) t)
  '(package-selected-packages
    (quote
     (magit realgud-lldb helm-make csharp-mode dired-rainbow lolcat rainbow-blocks rainbow-delimiters rainbow-identifiers helm-lsp vhdl-capf vhdl-tools lsp-mode company helm use-package doom-themes doom-modeline ace-window))))
@@ -116,12 +116,12 @@
 (global-set-key "\M-/" 'complete-symbol)
 
 
-(require 'use-package)
-(setq lsp-vhdl-server "hdl_checker")
+;;(require 'use-package)
+;;(setq lsp-vhdl-server "hdl_checker")
 ;;(setq lsp-vhdl-server-path "hdl_checker") ; only needed if hdl_checker is not already on the PATH
 
-(use-package lsp-mode
-  :config (add-hook 'vhdl-mode-hook 'lsp))
+;;(use-package lsp-mode
+;;  :config (add-hook 'vhdl-mode-hook 'lsp))
 
 ;; start server for use with emacs-client
 ;;------------------------------------------------------------------------------
@@ -210,7 +210,7 @@
   )
 
 (defun insert-current-date () 
-  "Inserts the timstamp year-month-day-hour-minute"
+  "Inserts the timestamp year-month-day-hour-minute"
   (interactive)
   (insert (shell-command-to-string "echo -n $(date +%Y-%m-%d-%H-%M)")))
 
@@ -245,12 +245,8 @@ end of the file"
   (compile "make"))
 ;;(define-key c-mode-map (kbd "C-c C-c") 'mycompile)
 (put 'dired-find-alternate-file 'disabled nil)
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+
 
 (setq c-default-style "linux"
-      c-basic-offset 4)
+      c-basic-offset 2)
+

@@ -31,7 +31,8 @@
 (package-initialize)
 (require 'package)
 (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
-(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+(add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+(package-initialize)
 
 
 (require 'use-package)
@@ -73,7 +74,7 @@
  '(helm-completion-style (quote emacs))
  '(package-selected-packages
    (quote
-    (magit realgud-lldb helm-make csharp-mode dired-rainbow lolcat rainbow-blocks rainbow-delimiters rainbow-identifiers helm-lsp vhdl-capf vhdl-tools lsp-mode company helm use-package doom-themes doom-modeline ace-window))))
+    (omnisharp magit realgud-lldb helm-make csharp-mode dired-rainbow lolcat rainbow-blocks rainbow-delimiters rainbow-identifiers helm-lsp vhdl-capf vhdl-tools lsp-mode company helm use-package doom-themes doom-modeline ace-window))))
  '(custom-safe-themes
    (quote
     ("e47c0abe03e0484ddadf2ae57d32b0f29f0b2ddfe7ec810bd6d558765d9a6a6c" "dd854be6626a4243375fd290fec71ed4befe90f1186eb5b485a9266011e15b29" "a4fa3280ffa1f2083c5d4dab44a7207f3f7bcb76e720d304bd3bd640f37b4bef" "bc99493670a29023f99e88054c9b8676332dda83a37adb583d6f1e4c13be62b8" "0fe9f7a04e7a00ad99ecacc875c8ccb4153204e29d3e57e9669691e6ed8340ce" "4b0b568d63b1c6f6dddb080b476cfba43a8bbc34187c3583165e8fb5bbfde3dc" "b60f08ddc98a95485ec19f046a81d5877b26ab80a67782ea5b91a00ea4f52170" "eb94e44599a45c495ad472ad551a40b87cbc4bae9631211e7a78d72b102c61b1" "8c75e2bdf8d1293c77a752dd210612cfb99334f7edd360a42a58a8497a078b35" "5e0b63e0373472b2e1cf1ebcc27058a683166ab544ef701a6e7f2a9f33a23726" "5c9a906b076fe3e829d030a404066d7949e2c6c89fc4a9b7f48c054333519ee7" "41039913efab185af1ec1b13ff4df36d6941994d5e3dee39791f30fcd94b42be" "92d8a13d08e16c4d2c027990f4d69f0ce0833c844dcaad3c8226ae278181d5f3" "669e05b25859b9e5b6b9809aa513d76dd35bf21c0f16d8cbb80fb0727dc8f842" "e7666261f46e2f4f42fd1f9aa1875bdb81d17cc7a121533cad3e0d724f12faf2" "5091eadbb87fa0a168a65f2c3e579d1a648d764f12ab9d3ab7bdefca709cd2a5" "1897b97f63e91a792e8540c06402f29d5edcbfb0aafd64b1b14270663d6868ee" "a4b9eeeabde73db909e6b080baf29d629507b44276e17c0c411ed5431faf87dd" "dc677c8ebead5c0d6a7ac8a5b109ad57f42e0fe406e4626510e638d36bcc42df" "a02836a5807a687c982d47728e54ff42a91bc9e6621f7fe7205b0225db677f07" "423435c7b0e6c0942f16519fa9e17793da940184a50201a4d932eafe4c94c92d" default)))
@@ -229,15 +230,16 @@ end of the file"
 
 
 
-;; (setq url-proxy-services
-;;        '(("no_proxy" . "^\\(localhost\\|10.*\\)")
-;;          ("http" . "proxy.rsint.net:80")
-;;          ("https" . "proxy.rsint.net:80")))
+ (setq url-proxy-services
+        '(("no_proxy" . "^\\(localhost\\|10.*\\)")
+          ("http" . "proxy.rsint.net:80")
+          ("https" . "proxy.rsint.net:80")))
 
-;; (setq url-http-proxy-basic-auth-storage (list
-;;                                          (list "proxy.rsint.net:80"
-;;                                                (cons "Input your LDAP UID !"
-;;                                                      (base64-encode-string "kempte_p:DkKyLNy3.")))))
+ (setq url-http-proxy-basic-auth-storage (list
+                                          (list "proxy.rsint.net:80"
+                                                (cons "Input your LDAP UID !"
+                                                      (base64-encode-string "kempte_p:DkKyLNy3.")))))
+
 
 (defun mycompile()
   (interactive)
@@ -255,3 +257,5 @@ end of the file"
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+;; Hello diff

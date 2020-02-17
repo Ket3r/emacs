@@ -250,7 +250,3 @@ end of the file"
 
 (setq c-default-style "linux"
       c-basic-offset 2)
-
-(add-to-list 'load-path "/home/peter/.emacs.d/beancount/editors/emacs/")
-(require 'beancount)
-(add-to-list 'auto-mode-alist '("\\.beancount\\'" . beancount-mode))
